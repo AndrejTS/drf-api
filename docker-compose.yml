@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_DB=drf_db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+    networks:
+      - backend
+
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DJANGO_SETTINGS_MODULE=project.settings.docker
+    networks:
+      - backend
+
+networks:
+  backend:
