@@ -10,6 +10,39 @@ from app import serializers
 
 logger = logging.getLogger(__name__)
 
+CREATE_SERIALIZERS = {
+    "AttributeValue": "AttributeValueSerializer",
+    "AttributeName": "AttributeNameSerializer",
+    "Attribute": "AttributeSerializer",
+    "Product": "ProductSerializer",
+    "ProductAttributes": "ProductAttributesSerializer",
+    "Image": "ImageSerializer",
+    "ProductImage": "ProductImageSerializer",
+    "Catalog": "CatalogCreateSerializer",
+}
+
+RETRIEVE_SERIALIZERS = {
+    "AttributeValue": "AttributeValueSerializer",
+    "AttributeName": "AttributeNameSerializer",
+    "Attribute": "AttributeSerializer",
+    "Product": "ProductSerializer",
+    "ProductAttributes": "ProductAttributesSerializer",
+    "Image": "ImageSerializer",
+    "ProductImage": "ProductImageSerializer",
+    "Catalog": "CatalogRetrieveSerializer",
+}
+
+UPDATE_SERIALIZERS = {
+    "AttributeValue": "AttributeValueSerializer",
+    "AttributeName": "AttributeNameSerializer",
+    "Attribute": "AttributeSerializer",
+    "Product": "ProductSerializer",
+    "ProductAttributes": "ProductAttributesSerializer",
+    "Image": "ImageSerializer",
+    "ProductImage": "ProductImageSerializer",
+    "Catalog": "CatalogUpdateSerializer",
+}
+
 
 @api_view(["GET"])
 def index(request):
@@ -22,21 +55,22 @@ def import_data(request):
         try:
             model_name = list(item.keys())[0]
             model = getattr(models, model_name)
-            serializer = getattr(serializers, f"{model_name}Serializer")
 
             data = item[model_name]
 
             try:
                 instance = model.objects.get(id=data["id"])
+                serializer = getattr(serializers, UPDATE_SERIALIZERS[model_name])
                 serializer_instance = serializer(instance, data=data)
             except model.DoesNotExist:
+                serializer = getattr(serializers, CREATE_SERIALIZERS[model_name])
                 serializer_instance = serializer(data=data)
 
             serializer_instance.is_valid()
             serializer_instance.save()
 
         except Exception as ex:
-            logger.error(f"Error processing item: {item}. Error: {ex}")
+            logger.exception(f"Error processing item: {item}. Error: {ex}")
 
     return Response(status=status.HTTP_201_CREATED)
 
@@ -47,7 +81,7 @@ def detail(request, model_name, _id=None):
     if not model:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    serializer = getattr(serializers, f"{model_name}Serializer")
+    serializer = getattr(serializers, RETRIEVE_SERIALIZERS[model_name])
 
     if _id is None:
         queryset = model.objects.all()

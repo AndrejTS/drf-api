@@ -55,10 +55,5 @@ class Catalog(models.Model):
     id = models.IntegerField(primary_key=True)
     nazev = models.CharField(max_length=255, null=True)
     obrazek_id = models.ForeignKey(Image, on_delete=models.SET_NULL, null=True)
-
-    # tady bych to udělal spíše pomocí ManyToManyField,
-    # ale budu se držet zadání
-    # products = models.ManyToManyField(Product)
-    # attributes = models.ManyToManyField(Attribute)
-    products_ids = models.JSONField(null=True)
-    attributes_ids = models.JSONField(null=True)
+    products = models.ManyToManyField(Product)
+    attributes = models.ManyToManyField(Attribute)
