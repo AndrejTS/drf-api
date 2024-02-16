@@ -51,7 +51,21 @@ def index(request):
 
 @api_view(["POST"])
 def import_data(request):
+    total_items_count = 0
+    error_items_count = 0
+    error_items = []
+
+    serializer = serializers.ImportDataSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(
+            {
+                "message": "Invalid request data",
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     for item in request.data:
+        total_items_count += 1
         try:
             model_name = list(item.keys())[0]
             model = getattr(models, model_name)
@@ -71,8 +85,23 @@ def import_data(request):
 
         except Exception as ex:
             logger.exception(f"Error processing item: {item}. Error: {ex}")
+            error_items_count += 1
+            error_items.append(item)
 
-    return Response(status=status.HTTP_201_CREATED)
+    if not error_items:
+        msg = "Import operation completed successfully"
+    else:
+        msg = "Import operation completed with partial success"
+
+    return Response(
+        {
+            "message": msg,
+            "total_items_count": total_items_count,
+            "error_items_count": error_items_count,
+            "error_items": error_items,
+        },
+        status=status.HTTP_200_OK,
+    )
 
 
 @api_view(["GET"])

@@ -12,6 +12,10 @@ from .models import (
 )
 
 
+class ImportDataSerializer(serializers.ListSerializer):
+    child = serializers.JSONField()
+
+
 class AttributeValueSerializer(serializers.ModelSerializer):
     class Meta:
         model = AttributeValue
